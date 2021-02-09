@@ -16,16 +16,14 @@ public class CountriesController {
 
     final String allUrl = "http://s3.amazonaws.com/json-countries/countries.json";
 
-    private String getCountryUrl(int id) {
-        return "http://s3.amazonaws.com/json-countries/" + String.valueOf(id) + ".json";
-    }
-
     @RequestMapping(path = "/countries/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Country getAllCountryById(@PathVariable("id") int id) {
-        final Country country = ClientBuilder.newClient().target(getCountryUrl(id))
-            .request(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-            .get(Country.class);
-        return country;
+        final List<Country> countries = ClientBuilder.newClient()
+                .target(allUrl)
+                .request(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+                .get(new GenericType<List<Country>>() {});
+        return countries.stream().filter(country -> country.getId() == id)
+            .findFirst().orElse(null);
     }
 
     @RequestMapping(path = "/countries", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
