@@ -12,10 +12,15 @@ apply plugin: 'io.spring.dependency-management'
 
 repositories {
     mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'io.opentelemetry:opentelemetry-sdk:1.0.1'
+    implementation 'io.opentelemetry:opentelemetry-api:1.0.1'
+    implementation 'io.opentelemetry:opentelemetry-exporter-otlp:1.0.1'
+    implementation 'io.grpc:grpc-netty:1.36.1'
     compile 'org.glassfish.jersey.core:jersey-client:2.25.1'
     compile 'org.glassfish.jersey.core:jersey-common:2.25.1'
     compile 'org.glassfish.jersey.media:jersey-media-json-jackson:2.22'

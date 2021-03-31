@@ -1,6 +1,11 @@
 package ca.lifornia.countries.controllers;
 
 import ca.lifornia.countries.models.Country;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.Tracer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,16 +19,26 @@ import java.util.List;
 @RestController
 public class CountriesController {
 
+    @Autowired
+	private OpenTelemetry openTelemetry;
+
     final String allUrl = "http://s3.amazonaws.com/json-countries/countries.json";
 
     @RequestMapping(path = "/countries/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Country getAllCountryById(@PathVariable("id") int id) {
+        Tracer tracer = openTelemetry.getTracer("instrumentation-name");
+        Span span = tracer.spanBuilder("span-builder").startSpan();
+
         final List<Country> countries = ClientBuilder.newClient()
                 .target(allUrl)
                 .request(javax.ws.rs.core.MediaType.APPLICATION_JSON)
                 .get(new GenericType<List<Country>>() {});
-        return countries.stream().filter(country -> country.getId() == id)
-            .findFirst().orElse(null);
+
+        Country result = countries.stream().filter(country -> country.getId() == id)
+                .findFirst().orElse(null);
+        span.end();
+        System.out.println(span);
+        return result;
     }
 
     @RequestMapping(path = "/countries", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
