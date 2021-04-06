@@ -1,9 +1,8 @@
 package ca.lifornia.countries.controllers;
 
 import ca.lifornia.countries.models.Country;
-import io.opentelemetry.api.OpenTelemetry;
+import io.honeycomb.opentelemetry.HoneycombSdk;
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -16,17 +15,19 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.GenericType;
 import java.util.List;
 
+import static io.opentelemetry.api.GlobalOpenTelemetry.getTracer;
+
 @RestController
 public class CountriesController {
 
     @Autowired
-	private OpenTelemetry openTelemetry;
+	private HoneycombSdk openTelemetry;
 
     final String allUrl = "http://s3.amazonaws.com/json-countries/countries.json";
 
     @RequestMapping(path = "/countries/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Country getAllCountryById(@PathVariable("id") int id) {
-        Tracer tracer = openTelemetry.getTracer("instrumentation-name");
+        Tracer tracer = getTracer("instrumentation-name");
         Span span = tracer.spanBuilder("span-builder").startSpan();
 
         final List<Country> countries = ClientBuilder.newClient()
@@ -43,9 +44,12 @@ public class CountriesController {
 
     @RequestMapping(path = "/countries", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Country> getAllCountries() {
+        Tracer tracer = openTelemetry.getTracer("instrumentation-name");
+        Span span = tracer.spanBuilder("span-builder").startSpan();
         final List<Country> countries = ClientBuilder.newClient().target(allUrl)
                 .request(javax.ws.rs.core.MediaType.APPLICATION_JSON)
                 .get(new GenericType<List<Country>>() {});
+        span.end();
         return countries;
     }
 }
