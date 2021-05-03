@@ -14,6 +14,7 @@ public class Application {
 	public HoneycombSdk getOpenTelemetry() {
 		return HoneycombSdk.builder()
 				.setApiKey("foobar")
+			        .setServiceName("countries-service")
 				.setDataset("java-sdk-honeycomb")
 				.setSampler(new DeterministicTraceSampler(5))
 				.build();
