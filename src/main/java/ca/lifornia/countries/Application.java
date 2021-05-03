@@ -13,7 +13,7 @@ public class Application {
 	@Bean
 	public HoneycombSdk getOpenTelemetry() {
 		return HoneycombSdk.builder()
-				.setApiKey("f84c1c641c2cd0292ed5391d1f8310d7")
+				.setApiKey("foobar")
 				.setDataset("java-sdk-honeycomb")
 				.setSampler(new DeterministicTraceSampler(5))
 				.build();
